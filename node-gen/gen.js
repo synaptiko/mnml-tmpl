@@ -1,1 +1,19 @@
-var root = function(el){var a={"class":"something {baseCls} {cls} nothing"};for(k in a){if(a.hasOwnProperty(k)) el.setAttribute(k,a[k])};el.appendChild(function(el){el.appendChild(dctn('Title: {title} - {testName}!!'));return el}(dce('h1')));el.appendChild(function(el){var a={"href":"http://{host}/test.html"};for(k in a){if(a.hasOwnProperty(k)) el.setAttribute(k,a[k])};el.appendChild(dctn('Test of {testName}'));return el}(dce('a')));el.appendChild(dctn(' '));el.appendChild(function(el){var a={"class":"hidden"};for(k in a){if(a.hasOwnProperty(k)) el.setAttribute(k,a[k])};el.appendChild(dctn('{testName}'));return el}(dce('span')));el.appendChild(function(el){el.appendChild(dctn('{!! myHtml}'));return el}(dce('div')));el.appendChild(function(el){el.appendChild(dctn('text around {!! myHtml} !!!'));return el}(dce('div')));el.appendChild(function(el){el.appendChild(dctn('{title}{!! myHtml}{!! myAnotherHtml}{title}'));return el}(dce('div')));el.appendChild(dctn('{amphibian}{!! amphibian}'));el.appendChild(function(el){return el}(dce('br')));el.appendChild(function(el){return el}(dce('br')));el.appendChild(function(el){el.appendChild(dctn('{# subtemplate}'));return el}(dce('div')));el.appendChild(function(el){var a={"events":"{item}"};for(k in a){if(a.hasOwnProperty(k)) el.setAttribute(k,a[k])};el.appendChild(dctn('Load more...'));return el}(dce('div')));el.appendChild(function(el){var a={"class":"{. cls}"};for(k in a){if(a.hasOwnProperty(k)) el.setAttribute(k,a[k])};el.appendChild(dctn('Load less...'));return el}(dce('div')));return el}(dce('div'))
+function TemplateFn() {
+  console.time('template');
+  var
+    dce = document.createElement.bind(document),
+    dctn = document.createTextNode.bind(document),
+    ce = function createElementFn(tag, attrs, children) {
+      var i, el = dce(tag);
+      for (i = 0; i < attrs.length; i += 2) {
+        el.setAttribute(attrs[i], attrs[i + 1]);
+      }
+      for (i = 0; i < children.length; i += 1) {
+        el.appendChild(children[i]);
+      }
+      return el;
+    },
+    root = ce('div', ['class', 'something {baseCls} {cls} nothing'], [ce('h1', [], [dctn('Title: {title} - {testName}!!')]), ce('a', ['href', 'http://{host}/test.html'], [dctn('Test of {testName}')]), dctn(' '), ce('span', ['class', 'hidden'], [dctn('{testName}')]), ce('div', [], [dctn('{!! myHtml}')]), ce('div', [], [dctn('text around {!! myHtml} !!!')]), ce('div', [], [dctn('{title}{!! myHtml}{!! myAnotherHtml}{title}')]), dctn('{amphibian}{!! amphibian}'), ce('br', [], []), ce('br', [], []), ce('div', [], [dctn('{# subtemplate}')]), ce('div', ['events', '{item}'], [dctn('Load more...')]), ce('div', ['class', '{. cls}'], [dctn('Load less...')])]);
+  console.timeEnd('template');
+  return root;
+}

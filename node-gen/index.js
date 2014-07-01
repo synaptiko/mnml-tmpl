@@ -1,3 +1,4 @@
+var fs = require('fs');
 var htmlparser = require("htmlparser2");
 var rawHtml = [
   '<div class="something {baseCls} {cls} nothing">',
@@ -13,19 +14,48 @@ var rawHtml = [
     '<div class="{. cls}">Load less...</div>', // for class-list/set support
   '</div>'
 ];
+
+function createElementFn(tag, attrs, children) {
+  var i, el = dce(tag);
+  for (i = 0; i < attrs.length; i += 2) {
+    el.setAttribute(attrs[i], attrs[i + 1]);
+  }
+  for (i = 0; i < children.length; i += 1) {
+    el.appendChild(children[i]);
+  }
+  return el;
+}
+
+function TemplateFn() {
+  console.time('template');
+  var
+    dce = document.createElement.bind(document),
+    dctn = document.createTextNode.bind(document),
+    ce = {ce:1},
+    root = {root:1};
+  console.timeEnd('template');
+  return root;
+}
+
 var handler = new htmlparser.DomHandler(function (error, dom) {
-	var result;
+	var result, templateFnString;
 
 	if (error) {
 		console.error(error);
 	}
 	else {
-		console.log(dom);
 		result = [];
 		createTemplate(dom, result);
-		console.log('var root = ' + result[0]);
+    templateFnString = TemplateFn.toString().replace(
+      '{ce:1}', createElementFn.toString().split('\n').join('\n    ')
+    ).replace(
+      '{root:1}', result[0].toString()
+    );
+    console.log(templateFnString);
+    fs.writeFileSync('./gen.js', templateFnString);
 	}
 });
+
 
 var parser = new htmlparser.Parser(handler);
 parser.write(rawHtml.join(''));
@@ -51,19 +81,19 @@ function createTemplate(dom, root) {
 function createElement(name, attrs) {
 	return {
 		children: [],
-		attrs: attrs,
 		toString: function() {
-			var attrs = '';
-			if (Object.keys(this.attrs).length > 0) {
-				attrs = "var a=" + JSON.stringify(this.attrs) + ";for(k in a){if(a.hasOwnProperty(k)) el.setAttribute(k,a[k])};";
-			}
-			var children = '';
-			if (this.children.length > 0) {
-				children = 'el.appendChild(';
-				children += this.children.join(');el.appendChild(');
-				children += ');';
-			}
-			return "function(el){" + attrs + children + "return el}(dce('" + name + "'))";
+      var mergedAttrs = [];
+      mergedAttrs = mergedAttrs.concat.apply(mergedAttrs, Object.keys(attrs).map(function(key) {
+        return [key, attrs[key].replace(/'/g, "\\'")];
+      }));
+
+      return [
+        'ce(',
+          "'" + name + "', ",
+          mergedAttrs.length > 0 ? "['" + mergedAttrs.join("', '") + "'], " : '[], ',
+          this.children.length > 0 ? '[' + this.children.join(', ') + ']' : '[]',
+        ')'
+      ].join('');
 		}
 	};
 }
@@ -71,24 +101,7 @@ function createElement(name, attrs) {
 function createTextNode(data) {
 	return {
 		toString: function() {
-			return "dctn('" + data + "')";
+			return "dctn('" + data.replace(/'/g, "\\'") + "')";
 		}
 	};
 }
-
-/////
-/*var dce = document.createElement.bind(document);
-var dctn = document.createTextNode.bind(document);
-var root = function(el) {
-	var a = {n:'v'};
-	for (k in a) {
-		if (a.hasOwnProperty(k)) el.setAttribute(k, a[k]);
-	}
-	el.appendChild(dctn('text'));
-	el.appendChild(function(el) {
-		el.appendChild(dctn('text'));
-		return el;
-	}(dce('div')));
-	el.appendChild(dctn('text'));
-	return el;
-}(dce('div'));*/
