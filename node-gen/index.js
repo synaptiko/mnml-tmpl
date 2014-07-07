@@ -1,40 +1,40 @@
 var fs = require('fs');
 var htmlparser = require("htmlparser2");
 var rawHtml = [
-  '<div class="something {baseCls} {cls} nothing">',
-    '<h1>Title: {title} - {testName}!!</h1>',
-    '<a href="http://{host}/test.html">Test of {testName}</a> <span class="hidden">{testName}</span>',
-    '<div>{!! myHtml}</div>', // for insertion of html
-    '<div>text around {!! myHtml} !!!</div>', // for insertion of html
-    '<div>{title}{!! myHtml}{!! myAnotherHtml}{title}</div>', // for insertion of html
-    '{amphibian}{!! amphibian}', // for insertion of html
-    '<br/><br/>',
-    '<div>{# subtemplate}</div>', // for insertion of reference to dom
-    '<div events="{item}">Load more...</div>', // for event-mounting
-    '<div class="{. cls}">Load less...</div>', // for class-list/set support
-  '</div>'
+	'<div class="something {baseCls} {cls} nothing">',
+	'<h1>Title: {title} - {testName}!!</h1>',
+	'<a href="http://{host}/test.html">Test of {testName}</a> <span class="hidden">{testName}</span>',
+	'<div>{!! myHtml}</div>', // for insertion of html
+	'<div>text around {!! myHtml} !!!</div>', // for insertion of html
+	'<div>{title}{!! myHtml}{!! myAnotherHtml}{title}</div>', // for insertion of html
+	'{amphibian}{!! amphibian}', // for insertion of html
+	'<br/><br/>',
+	'<div>{# subtemplate}</div>', // for insertion of reference to dom
+	'<div events="{item}">Load more...</div>', // for event-mounting
+	'<div class="{. cls}">Load less...</div>', // for class-list/set support
+	'</div>'
 ];
 
 function createElementFn(tag, attrs, children) {
-  var i, el = dce(tag);
-  for (i = 0; i < attrs.length; i += 2) {
-    el.setAttribute(attrs[i], attrs[i + 1]);
-  }
-  for (i = 0; i < children.length; i += 1) {
-    el.appendChild(children[i]);
-  }
-  return el;
+	var i, el = dce(tag);
+	for (i = 0; i < attrs.length; i += 2) {
+		el.setAttribute(attrs[i], attrs[i + 1]);
+	}
+	for (i = 0; i < children.length; i += 1) {
+		el.appendChild(children[i]);
+	}
+	return el;
 }
 
 function TemplateFn() {
-  console.time('template');
-  var
-    dce = document.createElement.bind(document),
-    dctn = document.createTextNode.bind(document),
-    ce = {ce:1},
-    root = {root:1};
-  console.timeEnd('template');
-  return root;
+	console.time('template');
+	var
+		dce = document.createElement.bind(document),
+		dctn = document.createTextNode.bind(document),
+		ce = {ce:1},
+		root = {root:1};
+	console.timeEnd('template');
+	return root;
 }
 
 var handler = new htmlparser.DomHandler(function (error, dom) {
@@ -46,13 +46,13 @@ var handler = new htmlparser.DomHandler(function (error, dom) {
 	else {
 		result = [];
 		createTemplate(dom, result);
-    templateFnString = TemplateFn.toString().replace(
-      '{ce:1}', createElementFn.toString().split('\n').join('\n    ')
-    ).replace(
-      '{root:1}', result[0].toString()
-    );
-    console.log(templateFnString);
-    fs.writeFileSync('./gen.js', templateFnString);
+		templateFnString = TemplateFn.toString().replace(
+			'{ce:1}', createElementFn.toString().split('\n').join('\n    ')
+		).replace(
+			'{root:1}', result[0].toString()
+		);
+		console.log(templateFnString);
+		fs.writeFileSync('./gen.js', templateFnString);
 	}
 });
 
@@ -82,18 +82,18 @@ function createElement(name, attrs) {
 	return {
 		children: [],
 		toString: function() {
-      var mergedAttrs = [];
-      mergedAttrs = mergedAttrs.concat.apply(mergedAttrs, Object.keys(attrs).map(function(key) {
-        return [key, attrs[key].replace(/'/g, "\\'")];
-      }));
+			var mergedAttrs = [];
+			mergedAttrs = mergedAttrs.concat.apply(mergedAttrs, Object.keys(attrs).map(function(key) {
+				return [key, attrs[key].replace(/'/g, "\\'")];
+			}));
 
-      return [
-        'ce(',
-          "'" + name + "', ",
-          mergedAttrs.length > 0 ? "['" + mergedAttrs.join("', '") + "'], " : '[], ',
-          this.children.length > 0 ? '[' + this.children.join(', ') + ']' : '[]',
-        ')'
-      ].join('');
+			return [
+				'ce(',
+					"'" + name + "', ",
+					mergedAttrs.length > 0 ? "['" + mergedAttrs.join("', '") + "'], " : '[], ',
+					this.children.length > 0 ? '[' + this.children.join(', ') + ']' : '[]',
+				')'
+			].join('');
 		}
 	};
 }
