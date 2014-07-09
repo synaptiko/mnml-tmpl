@@ -98,7 +98,7 @@
 			console.assert(element.firstChild.nodeValue === 'superman can fly');
 		},
 
-		"should replace placeholder surrounded by another string and elements with text in element's content": function() {
+		"should replace placeholders surrounded by another string and elements with text in element's content": function() {
 			var
 				template = new Template(['<div><strong>super</strong>{placeholder} can <b>fly</b></div>']),
 				element = template.getEl();
